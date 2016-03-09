@@ -1,0 +1,45 @@
+#!/usr/bin/python
+import ansible.playbook
+from ansible import callbacks
+from ansible import utils
+
+'''
+Do the following before running:
+1. fore ansible ssh as false
+  $ export ANSIBLE_HOST_KEY_CHECKING=False
+2. export AWS keys.
+3. Make sure ansible==1.9.4 and boto are installed.
+
+'''
+
+import optparse
+
+parser = optparse.OptionParser()
+parser.add_option('-s', '--service', action="store", help="service to be deployed. Ex: spark, hive, mongodb.")
+parser.add_option('-c', '--cloud', action="store", default="aws", help="cloud to deploy to. Ex: aws, openstack, digitalocean.")
+
+options, args = parser.parse_args()
+
+
+ANSIBLE_HOSTS = 'hosts'
+
+
+
+def deploy(book):
+    stats = callbacks.AggregateStats()
+    playbook_cb = callbacks.PlaybookCallbacks(verbose=utils.VERBOSITY)
+    inventory = ansible.inventory.Inventory(ANSIBLE_HOSTS)
+    runner_cb = callbacks.PlaybookRunnerCallbacks(stats,verbose=utils.VERBOSITY)
+
+    pb = ansible.playbook.PlayBook(playbook=book,
+                                   callbacks=playbook_cb,
+                                   runner_callbacks=runner_cb,
+                                   stats=stats, 
+                                   inventory=inventory,
+                                   extra_vars={'host_key_checking': False})
+    pb.run()
+
+if options.service == "mongodb":
+    deploy('./mongodb/deploy.yml')
+elif options.service == "cassandra":
+    deploy('./cassandra/deploy.yml')

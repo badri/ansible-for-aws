@@ -38,15 +38,13 @@
             from_port: 22
             to_port: 22
             cidr_ip: "{{ allowed_ip }}"
-          # allow http access from anywhere
           - proto: tcp
-            from_port: 80
-            to_port: 80
+            from_port: 9042
+            to_port: 9042
             cidr_ip: 0.0.0.0/0
-          # allow https access from anywhere
           - proto: tcp
-            from_port: 443
-            to_port: 443
+            from_port: 9160
+            to_port: 9160
             cidr_ip: 0.0.0.0/0
         rules_egress:
           - proto: all
